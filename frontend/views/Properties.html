@@ -1,0 +1,141 @@
+<section id="properties">
+    <div class="container my-5 py-5">
+      <h2 class="text-capitalize m-0 py-lg-5">Explore Properties</h2>
+  
+      <!-- Filter Section -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <select class="form-select" id="filterCity">
+            <option value="all">All Cities</option>
+            <option value="Texas">Texas</option>
+            <option value="Miami">Miami</option>
+            <option value="Chicago">Chicago</option>
+            <option value="New York">New York</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <select class="form-select" id="filterType">
+            <option value="all">All Types</option>
+            <option value="House">House</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Villa">Villa</option>
+          </select>
+        </div>
+      </div>
+  
+      <!-- Properties List -->
+      <div class="row" id="propertyList">
+        <div class="col-md-4 property-item"
+            data-id="property-1"
+            data-city="Miami"
+            data-type="House"
+            data-title="Miami House"
+            data-details="4 bed, 2 bath, 1203 Sqft"
+            data-image="assets/images/item15.png"
+            data-price="2500">
+          <div class="card open-popup" style="cursor:pointer;">
+            <img src="assets/images/item15.png" class="card-img-top" alt="property">
+            <div class="card-body">
+              <h5 class="card-title">Miami Luxury House</h5>
+              <ul class="d-flex">
+                <li class="residence-list"> <img src="assets/images/bed.png" alt="image"> 4 bed</li>
+                <li class="residence-list"> <img src="assets/images/bath.png" alt="image"> 2 bath</li>
+                <li class="residence-list"> <img src="assets/images/square.png" alt="image"> 1203 Sqft.</li>
+              </ul>
+              <h5> <img src="assets/images/dollar.png" alt="image"> 2500$/month</h5>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 property-item"
+            data-id="property-2"
+            data-city="Texas"
+            data-type="Villa"
+            data-title="Texas Villa"
+            data-details="5 bed, 2 bath, 1042 Sqft"
+            data-image="../assets/images/item12.jpg"
+            data-price="2300">
+          <div class="card open-popup" style="cursor:pointer;">
+            <img src="assets/images/item12.jpg" class="card-img-top" alt="property">
+            <div class="card-body">
+              <h5 class="card-title">Texas Luxury Villa</h5>
+              <ul class="d-flex">
+                <li class="residence-list"> <img src="assets/images/bed.png" alt="image"> 5 bed</li>
+                <li class="residence-list"> <img src="assets/images/bath.png" alt="image"> 2 bath</li>
+                <li class="residence-list"> <img src="assets/images/square.png" alt="image"> 1042 Sqft.</li>
+              </ul>
+              <h5> <img src="assets/images/dollar.png" alt="image"> 2300/month</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+<!-- Property Popup -->
+<div class="modal fade" id="propertyPopup" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title text-white" id="propertyTitle"></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 text-center">
+            <img id="propertyImage" class="img-fluid" alt="Property Image">
+            <p class="text-white" id="propertyDetails"></p>
+            <p class="text-white" id="propertyPrice"></p>
+
+            <!-- Property Amenities -->
+            <h5 class="mt-4">Amenities</h5>
+            <ul class="list-unstyled text-start">
+              <li><i class="bi bi-check-circle-fill"></i> Air Conditioning</li>
+              <li><i class="bi bi-check-circle-fill"></i> Parking Space</li>
+              <li><i class="bi bi-check-circle-fill"></i> Swimming Pool</li>
+              <li><i class="bi bi-check-circle-fill"></i> Garden</li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <!-- Public Inquiries Section -->
+            <h5>Inquiries & Answers</h5>
+            <div id="inquiryList" class="mb-3" style="max-height: 200px; overflow-y: auto;">
+              <div class="border-bottom border-secondary pb-2 mb-2">
+                <strong>Customer:</strong> Is the property pet-friendly?<br>
+                <strong>Agent:</strong> Yes, pets are allowed.
+              </div>
+              <div class="border-bottom border-secondary pb-2 mb-2">
+                <strong>Customer:</strong> What's the deposit fee?<br>
+                <strong>Agent:</strong> The deposit is one month rent.
+              </div>
+            </div>
+            <input type="hidden" id="currentPropertyId">
+            <form onsubmit="submitInquiry(event)">
+              <div class="mb-3">
+                <label for="userQuestion" class="form-label text-white">Ask your question</label>
+                <textarea class="form-control bg-dark text-white border-secondary" id="userQuestion" rows="3" placeholder="Type your question..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Inquiry</button>
+            </form>
+
+            <!-- Appointment Booking -->
+            <h5 class="mt-4">Book a Visit</h5>
+            <form>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="visitDate" class="form-label text-white">Date</label>
+                  <input type="date" id="visitDate" class="form-control bg-dark text-white border-secondary" min="2025-04-24">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="visitTime" class="form-label text-white">Time</label>
+                  <input type="time" id="visitTime" class="form-control bg-dark text-white border-secondary" min="08:00" max="18:00">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-dark border border-white">Book Appointment</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
