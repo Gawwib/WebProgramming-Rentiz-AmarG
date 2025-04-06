@@ -24,6 +24,7 @@
     });
   });
 
+
   rangeInput.forEach((input) => {
     input.addEventListener("input", (e) => {
       let minVal = parseInt(rangeInput[0].value),
@@ -175,18 +176,6 @@ function openPropertyPopup(title, details, image, price, id) {
 
 
 
-
-function filterProperties() {
-  const city = document.getElementById('filterCity')?.value || 'all';
-  const type = document.getElementById('filterType')?.value || 'all';
-  document.querySelectorAll('.property-item').forEach(property => {
-    const propertyCity = property.getAttribute('data-city');
-    const propertyType = property.getAttribute('data-type');
-    const show = (city === 'all' || city === propertyCity) && (type === 'all' || type === propertyType);
-    property.style.display = show ? 'block' : 'none';
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('filterCity')) {
     document.getElementById('filterCity').addEventListener('change', filterProperties);
@@ -215,6 +204,97 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+window.pageInit = function (page) {
+  // HOME PAGE
+  if (page === "home") {
+    if (typeof Swiper !== "undefined") {
+      new Swiper(".residence-swiper", {
+        slidesPerView: 3,
+        spaceBetween: 30,
+        navigation: {
+          nextEl: ".residence-swiper-next",
+          prevEl: ".residence-swiper-prev",
+        },
+        pagination: {
+          el: ".swiper-pagination",
+          clickable: true,
+        },
+        breakpoints: {
+          300: { slidesPerView: 1 },
+          768: { slidesPerView: 2 },
+          1024: { slidesPerView: 3 },
+        }
+      });
+    }
+  }
+
+  // PROPERTIES PAGE
+  if (page === "properties") {
+    function filterProperties() {
+      const city = document.getElementById('filterCity')?.value || 'all';
+      const type = document.getElementById('filterType')?.value || 'all';
+      document.querySelectorAll('.property-item').forEach(property => {
+        const match = (city === 'all' || city === property.dataset.city) &&
+                      (type === 'all' || type === property.dataset.type);
+        property.style.display = match ? 'block' : 'none';
+      });
+    }
+
+    const citySelect = document.getElementById('filterCity');
+    const typeSelect = document.getElementById('filterType');
+
+    if (citySelect && typeSelect) {
+      citySelect.addEventListener('change', filterProperties);
+      typeSelect.addEventListener('change', filterProperties);
+      filterProperties();
+    }
+
+    document.querySelectorAll('.property-item').forEach(item => {
+      const id = item.dataset.id;
+      const title = item.dataset.title;
+      const details = item.dataset.details;
+      const image = item.dataset.image;
+      const price = item.dataset.price;
+
+      const card = item.querySelector('.open-popup');
+      if (card) {
+        card.addEventListener('click', () => {
+          openPropertyPopup(title, details, image, price, id);
+        });
+      }
+    });
+  }
+  const inquiryForm = document.querySelector('#propertyPopup form[onsubmit]');
+if (inquiryForm) {
+  inquiryForm.addEventListener('submit', submitInquiry);
+}
+
+
+  function submitInquiry(event) {
+    event.preventDefault();
+  
+    const question = document.getElementById("userQuestion")?.value.trim();
+    const propertyId = document.getElementById("currentPropertyId")?.value;
+  
+    if (!question || !propertyId) return;
+  
+    const inquiryList = document.getElementById("inquiryList");
+    const div = document.createElement("div");
+    div.className = 'border-bottom border-secondary pb-2 mb-2';
+    div.innerHTML = `<strong>Customer:</strong> ${question}<br><strong>Agent:</strong> (Awaiting reply...)`;
+    inquiryList.appendChild(div);
+  
+    document.getElementById("userQuestion").value = "";
+  
+    // Store it in memory if needed (optional):
+    inquiriesByProperty[propertyId] = inquiriesByProperty[propertyId] || [];
+    inquiriesByProperty[propertyId].push(question);
+  }
+  
+
+  // You can add more: if (page === 'contact') { ... }
+};
 
 
 })(jQuery);
