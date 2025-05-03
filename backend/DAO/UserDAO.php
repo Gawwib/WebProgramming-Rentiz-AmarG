@@ -26,7 +26,7 @@ class UserDAO {
             $data['first_name'],
             $data['last_name'],
             $data['email'],
-            $data['password'], // make sure it's hashed before calling
+            $data['password'],
             $data['phone_number'],
             $data['role']
         ]);
