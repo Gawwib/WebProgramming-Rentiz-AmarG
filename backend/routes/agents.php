@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../middleware/AuthMiddleware.php';
+require_once __DIR__ . '/../middleware/RoleMiddleware.php';
+
 /**
  * @OA\Get(
  *     path="/agents",
@@ -41,6 +44,7 @@ Flight::route('GET /agents/@id', function ($id) {
  *     path="/agents",
  *     tags={"Agents"},
  *     summary="Create a new agent profile",
+ *     security={{"bearerAuth":{}}},
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
@@ -56,6 +60,9 @@ Flight::route('GET /agents/@id', function ($id) {
  * )
  */
 Flight::route('POST /agents', function () {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
     $data = Flight::request()->data->getData();
     Flight::json(Flight::agentProfileService()->add($data));
 });
@@ -65,6 +72,7 @@ Flight::route('POST /agents', function () {
  *     path="/agents/{id}",
  *     tags={"Agents"},
  *     summary="Update agent's license number",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
@@ -85,6 +93,9 @@ Flight::route('POST /agents', function () {
  * )
  */
 Flight::route('PUT /agents/@id', function ($id) {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
     $data = Flight::request()->data->getData();
     Flight::json(Flight::agentProfileService()->update($id, $data['license_number']));
 });
@@ -94,6 +105,7 @@ Flight::route('PUT /agents/@id', function ($id) {
  *     path="/agents/{id}",
  *     tags={"Agents"},
  *     summary="Delete an agent",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
@@ -107,5 +119,8 @@ Flight::route('PUT /agents/@id', function ($id) {
  * )
  */
 Flight::route('DELETE /agents/@id', function ($id) {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
     Flight::json(Flight::agentProfileService()->delete($id));
 });

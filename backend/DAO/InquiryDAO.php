@@ -8,6 +8,15 @@ class InquiryDAO {
         $this->conn = $pdo;
     }
 
+    public function add($data) {
+        $stmt = $this->conn->prepare("INSERT INTO property_inquiries (property_id, user_id, question) VALUES (?, ?, ?)");
+        $stmt->execute([$data['property_id'], $data['user_id'], $data['question']]);
+
+        // Return the newly inserted inquiry
+        $id = $this->conn->lastInsertId();
+        return $this->getById($id); 
+    }
+
     public function getAll() {
         $stmt = $this->conn->query("SELECT * FROM property_inquiries");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -32,9 +41,18 @@ class InquiryDAO {
             $data['property_id'],
             $data['user_id'],
             $data['question'],
-            $data['answer']
+            $data['answer'] ?? null
         ]);
         return $this->conn->lastInsertId();
+    }
+    
+    public function update($id, $data) {
+        $stmt = $this->conn->prepare("UPDATE property_inquiries SET question = ?, answer = ? WHERE inquiry_id = ?");
+        $stmt->execute([
+            $data['question'] ?? null,
+            $data['answer'] ?? null,
+            $id
+        ]);
     }
 
     public function delete($id) {

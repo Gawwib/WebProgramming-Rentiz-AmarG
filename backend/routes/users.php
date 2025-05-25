@@ -1,10 +1,14 @@
 <?php
 
+require_once __DIR__ . '/../middleware/AuthMiddleware.php';
+require_once __DIR__ . '/../middleware/RoleMiddleware.php';
+
 /**
  * @OA\Get(
  *     path="/users",
  *     tags={"Users"},
- *     summary="Get all users",
+ *     summary="Get all users (agent only)",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Response(
  *         response=200,
  *         description="List of all users"
@@ -12,6 +16,9 @@
  * )
  */
 Flight::route('GET /users', function () {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
     Flight::json(Flight::userService()->get_all());
 });
 
@@ -20,6 +27,7 @@ Flight::route('GET /users', function () {
  *     path="/users/{id}",
  *     tags={"Users"},
  *     summary="Get user by ID",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
@@ -27,76 +35,60 @@ Flight::route('GET /users', function () {
  *         description="User ID",
  *         @OA\Schema(type="integer")
  *     ),
- *     @OA\Response(
- *         response=200,
- *         description="User data"
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="User not found"
- *     )
+ *     @OA\Response(response=200, description="User data"),
+ *     @OA\Response(response=404, description="User not found")
  * )
  */
 Flight::route('GET /users/@id', function ($id) {
-    Flight::json(Flight::userService()->get_by_id($id));
-});
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent', 'client'])();
 
-/**
- * @OA\Post(
- *     path="/users",
- *     summary="Create a new user",
- *     tags={"Users"},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={"first_name", "last_name", "email", "password", "phone_number", "role"},
- *             @OA\Property(property="first_name", type="string", example="Jane"),
- *             @OA\Property(property="last_name", type="string", example="Doe"),
- *             @OA\Property(property="email", type="string", format="email", example="jane@example.com"),
- *             @OA\Property(property="password", type="string", example="SecurePass123"),
- *             @OA\Property(property="phone_number", type="string", example="+38762111222"),
- *             @OA\Property(property="role", type="string", example="user")
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="User created successfully"
- *     )
- * )
- */
-Flight::route('POST /users', function () {
-    $data = Flight::request()->data->getData();
-    Flight::json(Flight::userService()->add($data));
+    $user = Flight::get('user');
+
+    if ($user['role'] === 'client' && $user['user_id'] != $id) {
+        Flight::json(['error' => 'Access denied'], 403);
+        return;
+    }
+
+    Flight::json(Flight::userService()->get_by_id($id));
 });
 
 /**
  * @OA\Put(
  *     path="/users/{id}",
  *     tags={"Users"},
- *     summary="Update an existing user",
+ *     summary="Update user info (self or agent)",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
  *         required=true,
- *         description="User ID",
  *         @OA\Schema(type="integer")
  *     ),
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
- *             @OA\Property(property="name", type="string", example="Updated Name"),
+ *             @OA\Property(property="first_name", type="string", example="Updated"),
+ *             @OA\Property(property="last_name", type="string", example="Name"),
  *             @OA\Property(property="email", type="string", example="updated@example.com"),
- *             @OA\Property(property="password", type="string", example="newSecurePass"),
- *             @OA\Property(property="phone", type="string", example="+38762000000")
+ *             @OA\Property(property="phone_number", type="string", example="1234567890"),
+ *             @OA\Property(property="role", type="string", example="client")
  *         )
  *     ),
- *     @OA\Response(
- *         response=200,
- *         description="User updated successfully"
- *     )
+ *     @OA\Response(response=200, description="User updated")
  * )
  */
 Flight::route('PUT /users/@id', function ($id) {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent', 'client'])();
+
+    $user = Flight::get('user');
+
+    if ($user['role'] === 'client' && $user['user_id'] != $id) {
+        Flight::json(['error' => 'You can only update your own profile'], 403);
+        return;
+    }
+
     $data = Flight::request()->data->getData();
     Flight::json(Flight::userService()->update($id, $data));
 });
@@ -105,22 +97,20 @@ Flight::route('PUT /users/@id', function ($id) {
  * @OA\Delete(
  *     path="/users/{id}",
  *     tags={"Users"},
- *     summary="Delete a user",
+ *     summary="Delete a user (agent only)",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
  *         required=true,
- *         description="User ID",
  *         @OA\Schema(type="integer")
  *     ),
- *     @OA\Response(
- *         response=200,
- *         description="User deleted successfully"
- *     )
+ *     @OA\Response(response=200, description="User deleted")
  * )
  */
 Flight::route('DELETE /users/@id', function ($id) {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
     Flight::json(Flight::userService()->delete($id));
 });
-
-?>

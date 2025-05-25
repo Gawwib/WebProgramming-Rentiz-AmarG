@@ -1,10 +1,9 @@
 <?php
-class InquiryService
-{
+class InquiryService {
     private $dao;
 
-    public function __construct($dao) {
-        $this->dao = $dao;
+    public function __construct() {
+        $this->dao = new InquiryDAO(Flight::get('pdo'));
     }
 
     public function get_all() {
@@ -27,4 +26,5 @@ class InquiryService
         return $this->dao->delete($id);
     }
 }
+
 ?>
