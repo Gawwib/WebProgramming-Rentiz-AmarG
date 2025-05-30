@@ -1,10 +1,14 @@
 <?php
 
+require_once __DIR__ . '/../middleware/AuthMiddleware.php';
+require_once __DIR__ . '/../middleware/RoleMiddleware.php';
+
 /**
  * @OA\Get(
  *     path="/inquiries",
  *     tags={"Inquiries"},
- *     summary="Get all inquiries",
+ *     summary="Get all inquiries (agent only)",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Response(
  *         response=200,
  *         description="List of inquiries"
@@ -12,28 +16,15 @@
  * )
  */
 Flight::route('GET /inquiries', function () {
-    Flight::json(Flight::inquiryService()->get_all());
-});
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
 
-/**
- * @OA\Get(
- *     path="/inquiries/{id}",
- *     tags={"Inquiries"},
- *     summary="Get inquiry by ID",
- *     @OA\Parameter(
- *         name="id",
- *         in="path",
- *         required=true,
- *         @OA\Schema(type="integer")
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Inquiry details"
- *     )
- * )
- */
-Flight::route('GET /inquiries/@id', function ($id) {
-    Flight::json(Flight::inquiryService()->get_by_id($id));
+     try {
+        $data = Flight::inquiryService()->get_all();
+        Flight::json($data);
+    } catch (Exception $e) {
+        Flight::json(['error' => $e->getMessage()], 500);
+    }
 });
 
 /**
@@ -41,6 +32,7 @@ Flight::route('GET /inquiries/@id', function ($id) {
  *     path="/inquiries/property/{property_id}",
  *     tags={"Inquiries"},
  *     summary="Get inquiries by property ID",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="property_id",
  *         in="path",
@@ -54,39 +46,104 @@ Flight::route('GET /inquiries/@id', function ($id) {
  * )
  */
 Flight::route('GET /inquiries/property/@property_id', function ($property_id) {
-    $dao = new InquiryDAO(Flight::get('pdo'));
-    Flight::json($dao->getByProperty($property_id));
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
+    Flight::json(Flight::inquiryService()->getByProperty($property_id));
+});
+
+/**
+ * @OA\Get(
+ *     path="/inquiries/{id}",
+ *     tags={"Inquiries"},
+ *     summary="Get inquiry by ID (agent only)",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Inquiry details"
+ *     )
+ * )
+ */
+Flight::route('GET /inquiries/@id', function ($id) {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
+    Flight::json(Flight::inquiryService()->getById($id));
 });
 
 /**
  * @OA\Post(
  *     path="/inquiries",
  *     tags={"Inquiries"},
- *     summary="Create a new inquiry",
+ *     summary="Submit a new property inquiry (client only)",
+ *     security={{"bearerAuth":{}}},
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
- *             @OA\Property(property="user_id", type="integer", example=3),
- *             @OA\Property(property="property_id", type="integer", example=7),
- *             @OA\Property(property="message", type="string", example="Is the property available?")
+ *             required={"property_id", "user_id", "question"},
+ *             @OA\Property(property="property_id", type="integer", example=2),
+ *             @OA\Property(property="user_id", type="integer", example=5),
+ *             @OA\Property(property="question", type="string", example="Is the apartment pet-friendly?")
  *         )
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Inquiry created"
+ *         description="Inquiry submitted"
  *     )
  * )
  */
 Flight::route('POST /inquiries', function () {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['client'])();
+
     $data = Flight::request()->data->getData();
     Flight::json(Flight::inquiryService()->add($data));
+});
+
+/**
+ * @OA\Put(
+ *     path="/inquiries/{id}",
+ *     tags={"Inquiries"},
+ *     summary="Agent responds to an inquiry",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="answer", type="string", example="Yes, it is pet-friendly.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Inquiry answered"
+ *     )
+ * )
+ */
+Flight::route('PUT /inquiries/@id', function ($id) {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
+    $data = Flight::request()->data->getData();
+    Flight::json(Flight::inquiryService()->update($id, $data));
 });
 
 /**
  * @OA\Delete(
  *     path="/inquiries/{id}",
  *     tags={"Inquiries"},
- *     summary="Delete an inquiry",
+ *     summary="Delete an inquiry (agent only)",
+ *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
@@ -100,5 +157,8 @@ Flight::route('POST /inquiries', function () {
  * )
  */
 Flight::route('DELETE /inquiries/@id', function ($id) {
+    AuthMiddleware::handle();
+    RoleMiddleware::allow(['agent'])();
+
     Flight::json(Flight::inquiryService()->delete($id));
 });

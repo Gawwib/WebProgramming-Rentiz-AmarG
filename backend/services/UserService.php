@@ -8,7 +8,7 @@ class UserService
     }
 
     public function get_all() {
-        return $this->dao->getAll();
+        return $this->dao->get_all();
     }
 
     public function get_by_id($id) {

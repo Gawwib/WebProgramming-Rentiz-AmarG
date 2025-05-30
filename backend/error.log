@@ -1,0 +1,5 @@
+[Exception] Too few arguments to function UserDAO::__construct(), 0 passed in C:\xampp\htdocs\WebProgramming-Rentiz\WebProgramming-Rentiz-AmarG\backend\index.php on line 21 and exactly 1 expected
+[Exception] Too few arguments to function UserDAO::__construct(), 0 passed in C:\xampp\htdocs\WebProgramming-Rentiz\WebProgramming-Rentiz-AmarG\backend\index.php on line 25 and exactly 1 expected
+[Exception] Too few arguments to function UserDAO::__construct(), 0 passed in C:\xampp\htdocs\WebProgramming-Rentiz\WebProgramming-Rentiz-AmarG\backend\index.php on line 25 and exactly 1 expected
+[Exception] Class "RoleMiddleware" not found
+[Exception] Class "RoleMiddleware" not found

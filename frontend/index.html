@@ -55,7 +55,7 @@
               aria-label="Close"></button>
           </div>
           <div class="offcanvas-body">
-            <ul class="navbar-nav align-items-center justify-content-end align-items-center flex-grow-1 ">
+            <ul id="dynamic-nav" class="navbar-nav align-items-center justify-content-end align-items-center flex-grow-1">
               <li class="nav-item">
                 <a class="nav-link active me-md-4" href="#home">Home</a>
               </li>
@@ -132,5 +132,42 @@
 
 
 </body>
+<script>
+  function loadPage(page) {
+    fetch(`views/${page}.html`)
+      .then(response => {
+        if (!response.ok) throw new Error(`Page not found: ${page}`);
+        return response.text();
+      })
+      .then(html => {
+        document.getElementById("content").innerHTML = html;
+
+        // Run pageInit once content is injected
+        setTimeout(() => {
+          if (typeof window.pageInit === "function") {
+            window.pageInit(page);
+          }
+        }, 100);
+      })
+      .catch(error => console.error("Error loading page:", error));
+  }
+
+  // Initial load
+  window.addEventListener('load', () => {
+    let page = window.location.hash.substring(1);
+    if (!page) {
+      window.location.hash = "#home"; // triggers hashchange
+    } else {
+      loadPage(page);
+    }
+  });
+
+  // On navigation
+  window.addEventListener('hashchange', () => {
+    const page = window.location.hash.substring(1);
+    loadPage(page);
+  });
+</script>
+
 
 </html>

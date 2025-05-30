@@ -1,4 +1,19 @@
 <?php
+/**
+ * @OA\Info(
+ *     title="Rentiz API",
+ *     version="1.0",
+ *     description="API documentation for Rentiz system"
+ * )
+ *
+ * @OA\SecurityScheme(
+ *     securityScheme="ApiKey",
+ *     type="apiKey",
+ *     in="header",
+ *     name="Authentication"
+ * )
+ */
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
