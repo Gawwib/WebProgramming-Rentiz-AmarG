@@ -654,6 +654,55 @@ function logout() {
 window.addEventListener('load', renderNavbar);
 window.logout = logout;
 
+$(document).ready(() => {
+  // Initialize validation for signup form
+  $("#signupForm").validate({
+    rules: {
+      firstName: { required: true, minlength: 2 },
+      lastName: { required: true, minlength: 2 },
+      phone: { required: true, minlength: 5 },
+      email: { required: true, email: true },
+      password: { required: true, minlength: 6 },
+      confirmPassword: { required: true, equalTo: "#password" },
+      agree: { required: true }
+    },
+    messages: {
+      firstName: "Please enter at least 2 characters",
+      lastName: "Please enter at least 2 characters",
+      phone: "Please enter a valid phone number",
+      email: "Please enter a valid email address",
+      password: "Password must be at least 6 characters",
+      confirmPassword: "Passwords do not match",
+      agree: "You must agree to the Privacy Policy"
+    },
+    submitHandler: function(form) {
+      // Show blocking UI
+      $.blockUI({ message: '<h3>Processing...</h3>' });
+
+      // Use your existing signup logic
+      const data = {
+        first_name: $("#firstName").val(),
+        last_name: $("#lastName").val(),
+        phone: $("#phone").val(),
+        email: $("#email").val(),
+        password: $("#password").val()
+      };
+
+      UserService.signup(data)
+        .then(() => {
+          alert("Signup successful!");
+          form.reset();
+        })
+        .catch((err) => {
+          alert("Signup error: " + err);
+        })
+        .finally(() => {
+          $.unblockUI();
+        });
+    }
+  });
+});
+
 
 
 

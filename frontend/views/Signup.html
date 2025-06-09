@@ -1,39 +1,84 @@
-  <div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="card p-4 bg-light text-dark" style="min-width: 400px;">
-      <h2 class="text-center mb-4">Sign Up</h2>
-      <form>
-        <div class="mb-3">
-          <label for="firstName" class="form-label text-white">First Name</label>
-          <input type="text" class="form-control" id="firstName" placeholder="First Name">
-        </div>
-        <div class="mb-3">
-          <label for="lastName" class="form-label text-white">Last Name</label>
-          <input type="text" class="form-control" id="lastName" placeholder="Last Name">
-        </div>
-        <div class="mb-3">
-          <label for="phone" class="form-label text-white">Phone Number</label>
-          <input type="text" class="form-control" id="phone" placeholder="Phone Number">
-        </div>
-        <div class="mb-3">
-          <label for="email" class="form-label text-white">Email address</label>
-          <input type="email" class="form-control" id="email" placeholder="Enter email">
-        </div>
-        <div class="mb-3">
-          <label for="password" class="form-label text-white">Password</label>
-          <input type="password" class="form-control" id="password" placeholder="Password">
-        </div>
-        <div class="mb-3">
-          <label for="confirmPassword" class="form-label text-white">Confirm Password</label>
-          <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password">
-        </div>
-        <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="agree">
-          <label class="form-check-label text-white" for="agree">I agree to the <a href="https://policies.google.com/" target="_blank">Privacy Policy</a></label>
-        </div>
-        <button type="submit" class="btn btn-dark w-100">Sign Up</button>
-        <div class="text-center mt-3">
-          <a href="#login" class="text-decoration-none">Already have an account? Log In</a>
-        </div>
-      </form>
-    </div>
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+  <div class="card p-4 bg-light text-dark" style="min-width: 400px;">
+    <h2 class="text-center mb-4">Sign Up</h2>
+    <form id="signupForm">
+      <div class="mb-3">
+        <label for="firstName" class="form-label">First Name</label>
+        <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name" required minlength="2">
+      </div>
+      <div class="mb-3">
+        <label for="lastName" class="form-label">Last Name</label>
+        <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name" required minlength="2">
+      </div>
+      <div class="mb-3">
+        <label for="phone" class="form-label">Phone Number</label>
+        <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone Number" required minlength="5">
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required minlength="6">
+      </div>
+      <div class="mb-3">
+        <label for="confirmPassword" class="form-label">Confirm Password</label>
+        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required equalTo="#password">
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="agree" name="agree" required>
+        <label class="form-check-label" for="agree">I agree to the <a href="https://policies.google.com/" target="_blank">Privacy Policy</a></label>
+      </div>
+      <button type="submit" class="btn btn-dark w-100">Sign Up</button>
+      <div class="text-center mt-3">
+        <a href="#login" class="text-decoration-none">Already have an account? Log In</a>
+      </div>
+    </form>
   </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  $("#signupForm").validate({
+    rules: {
+      firstName: { required: true, minlength: 2 },
+      lastName: { required: true, minlength: 2 },
+      phone: { required: true, minlength: 5 },
+      email: { required: true, email: true },
+      password: { required: true, minlength: 6 },
+      confirmPassword: { required: true, equalTo: "#password" },
+      agree: { required: true }
+    },
+    messages: {
+      firstName: "Please enter at least 2 characters",
+      lastName: "Please enter at least 2 characters",
+      phone: "Please enter a valid phone number",
+      email: "Please enter a valid email address",
+      password: "Password must be at least 6 characters",
+      confirmPassword: "Passwords do not match",
+      agree: "You must agree to the Privacy Policy"
+    },
+    submitHandler: function(form) {
+      // Block UI during submission
+      $.blockUI({ message: '<h3>Processing...</h3>' });
+      const data = {
+        first_name: $("#firstName").val(),
+        last_name: $("#lastName").val(),
+        phone: $("#phone").val(),
+        email: $("#email").val(),
+        password: $("#password").val()
+      };
+      UserController.signup(data).then(() => {
+        alert("Signup successful!");
+        form.reset();
+      }).catch(err => {
+        alert("Signup error: " + err);
+      }).finally(() => {
+        $.unblockUI();
+      });
+    }
+  });
+});
+</script>
